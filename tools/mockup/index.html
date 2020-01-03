@@ -1,0 +1,152 @@
+<html>
+  <head>
+    <title>Merchant Reports</title>
+    <link rel="stylesheet" type="text/css" href="css/semantic.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="ui sidebar vertical menu">
+        <a class="item">&nbsp;</a>
+        <a class="item" href="index.html"> Transactions </a>
+        <a class="item" href="billing.html"> Billing </a>
+        <a class="item" href="funding.html"> Funding </a>
+    </div>
+    <div class="pusher">
+      <div class="ui top fixed menu">
+        <a id="menu" class="icon item"><i class="sidebar icon"></i></a>
+        <a class="item">Reports</a>
+      </div>
+      <div class="ui container main">
+          <div class="ui top attached segment"><h1>Mandarin Orchard</h1></div>
+          <div class="ui bottom attached tabular menu">
+            <a class="item active" data-tab="transactions"> Transactions </a>
+            <a class="item" data-tab="insights"> Insights </a>
+          </div>
+    
+          <h3><i class="table icon"></i>Date range</h3>
+          <div class="ui two column grid">
+            <div class="row">
+              <div class="column">
+                <div class="ui form">
+                  <div class="fields">
+                    <div class="field compact">
+                      <label>Start date</label>
+                      <div class="ui calendar" id="rangestart">
+                        <div class="ui input left icon">
+                          <i class="calendar icon"></i>
+                          <input type="text" placeholder="Start" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label>End date</label>
+                      <div class="ui calendar" id="rangeend">
+                        <div class="ui input left icon">
+                          <i class="calendar icon"></i>
+                          <input type="text" placeholder="End" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="column" id="csv">
+                <div
+                  class="ui right floated button"
+                  id="csv-button"
+                  onclick="doSomething('hey')"
+                >
+                  <p>Export as CSV</p>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <table class="ui sortable celled table">
+            <thead>
+              <tr>
+                <th class="sorted descending">Date / Time</th>
+                <th>MID</th>
+                <th>MID Name</th>
+                <th>Order</th>
+                <th>Amount</th>
+                <th>Fee</th>
+                <th>Currency</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2018/10/26 - 10:39</td>
+                <td>223611</td>
+                <td>Front Desk MPGS</td>
+                <td>00013</td>
+                <td>$150</td>
+                <td>$0.30</td>
+                <td>SGD</td>
+                <td>Approved</td>
+              </tr>
+              <tr>
+                <td>2018/10/26 - 10:32</td>
+                <td>223610</td>
+                <td>Front Desk Maybank</td>
+                <td>00012</td>
+                <td>$250</td>
+                <td>$0.30</td>
+                <td>SGD</td>
+                <td>Approved</td>
+              </tr>
+              <tr>
+                <td>2018/10/26 - 10:29</td>
+                <td>223610</td>
+                <td>Front Desk Maybank</td>
+                <td>00012</td>
+                <td>$250</td>
+                <td>$0.30</td>
+                <td>SGD</td>
+                <td>Approved</td>
+              </tr>
+              <tr>
+                <td>2018/10/26 - 10:19</td>
+                <td>223613</td>
+                <td>Front Desk Amex</td>
+                <td>00011</td>
+                <td>$100</td>
+                <td>$0.30</td>
+                <td>SGD</td>
+                <td class="negative">Rejected</td>
+              </tr>
+              <tr>
+                <td>2018/10/1 - 00:01</td>
+                <td>-</td>
+                <td>Monthly Fee</td>
+                <td>-</td>
+                <td>-</td>
+                <td>$50</td>
+                <td>SGD</td>
+                <td>Charged</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th>Totals</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>$750</th>
+                <th>$51.20</th>
+                <th>3 Approved</th>
+                <th>1 Rejected</th>
+              </tr>
+            </tfoot>
+          </table>
+      </div>    
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+    <script src="script/semantic.min.js"></script>
+    <script src="script/tablesort.js"></script>
+    <script src="script/script.js"></script>
+  </body>
+</html>

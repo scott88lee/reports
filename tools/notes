@@ -1,0 +1,41 @@
+{
+  "id": "4i0qvlzxww",
+  "reference": "pb3g1w3eelz3pxj", // trx entry id
+  "resource": "rid:cardpay:order/pdbptp9zwk", //rdp gen
+  "description": "string",
+  "detail": { "detail1": "description1", "detail2": "description2" },
+  "mode": "card",
+  "method": "maybank",
+  "entry": "debit",
+  "amount": 9.14,
+  "currency": "USD",
+  "source": "rid:card:token/o6n583owmg",
+  "merchant": "rid:merchant:merchant/merchant1",
+  "account": "rid:merchant:account/account2",
+  "action": "autocapture",
+  "status": "success",
+  "createdDate": "2018-12-12T06:34:00Z",
+  "importedDate": "2018-12-12T06:34:00Z"
+},
+
+3months limit retrieval
+Transactions, bill, funding.
+
+funding - holiday weekends
+manual adjustments
+
+action buttons - refunds/chargeback/revchargeback/void
+
+if refunded, cannot chargeback
+if chargeback cannot refund
+
+RDP view - first6, last 4
+
+transaction feature, custom field CSV
+Group transaction.
+
+
+
+
+
+[{"status":"success","account":"rid:merchant:account/account2","resource":"rid:cardpay:order/db9tefmv1mxf02o","description":"TEST","reference":"i17xgrxswcys9b7","currency":"USD","importeddate":"2018-12-05T09:50:33Z","state":"authorize","id":"8bba04664baabac1a380cfc3bcf3b7115ded5035629da8a566ac7bc6698d6b34","source":"rid:card:token/2tbk482kmg","amount":"31.84","detail":"eyJkZXRhaWwxIjoiZGVzY3JpcHRpb24xIiwiZGV0YWlsMiI6ImRlc2NyaXB0aW9uMiJ9","mode":"card","ttl":"1551779433","action":"close","hashid":"54645d87a3e885e7a67ddb760617ee787b4176fcbdc99f79db59f86675d0a034","entry":"credit","method":"cybersource","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2Fmerchant1","createddate":"2018-12-12T04%3A31%3A00Z","key":"8bba04664baabac1a380cfc3bcf3b7115ded5035629da8a566ac7bc6698d6b34"},{"status":"fail","account":"rid:merchant:account/account2","resource":"rid:cardpay:order/agonzhibp88s0sl","description":"TEST","reference":"lbt2tf5ozp7x1p4","currency":"USD","importeddate":"2018-12-05T09:50:38Z","state":"refund","id":"d1e64f2e6a98c024cd1b323900577178bf1bf86577714e7b2e0766aed4b8d2ad","source":"rid:card:token/uih50d91mo","amount":"81.03","detail":"eyJkZXRhaWwxIjoiZGVzY3JpcHRpb24xIiwiZGV0YWlsMiI6ImRlc2NyaXB0aW9uMiJ9","mode":"card","ttl":"1551779438","action":"capture","hashid":"62d6e88ec0ccec73d380fee2e92950f6d12d990b8d2ea68d7dd9327d4456fde6","entry":"debit","method":"cybersource","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2Fmerchant1","createddate":"2018-12-12T02%3A12%3A00Z","key":"d1e64f2e6a98c024cd1b323900577178bf1bf86577714e7b2e0766aed4b8d2ad"},{"status":"fail","account":"rid:merchant:account/account2","resource":"rid:cardpay:order/adhi7h605vyq29j","description":"TEST","reference":"34tord0kijxr45u","currency":"SGD","importeddate":"2018-12-05T09:50:43Z","state":"refund","id":"9489eb01839e0f57128660777bacaf22022246d50b227b737e5a82e7bdd6dc3a","source":"rid:card:token/vaksqfd2g7","amount":"15.68","detail":"eyJkZXRhaWwxIjoiZGVzY3JpcHRpb24xIiwiZGV0YWlsMiI6ImRlc2NyaXB0aW9uMiJ9","mode":"card","ttl":"1551779443","action":"refund","hashid":"dc542e49ddfc7028cd55051622ac1984cbf550ad12cbf667252516fade15844a","entry":"credit","method":"maybank","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2Fmerchant1","createddate":"2018-12-12T03%3A53%3A00Z","key":"9489eb01839e0f57128660777bacaf22022246d50b227b737e5a82e7bdd6dc3a"},{"status":"success","account":"rid:merchant:account/23423423","resource":"rid:altpay:account/23423423/order/2342342/fetch","description":"string","reference":"uytgefuewrweryoyo","currency":"USD","importeddate":"2018-12-05T09:26:37Z","state":"pending","id":"1f69fda1e4a3fead6a2914ef4fd23aae5a5827916cf601c78da1c8e8506eeb43","source":"rid:altpay:account/23423423/order/2342342/fetch","amount":"5.5","detail":"ewogICAgICAgICJkZXRhaWwxIjogImRlc2NyaXB0aW9uMSIsCiAgICAgICAgImRldGFpbDIiOiAiZGVzY3JpcHRpb24yIn0=","mode":"alt","ttl":"1551777997","action":"auto-capture","hashid":"fb9ff853c99c5b464f9f1afc31bb36a1720dbd48c8ac41bf01dd33c2415ac7e3","entry":"credit","method":"wechat","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2F234242","createddate":"2018-08-17T09%3A52%3A08Z","key":"1f69fda1e4a3fead6a2914ef4fd23aae5a5827916cf601c78da1c8e8506eeb43"},{"status":"success","account":"rid:merchant:account/account2","resource":"rid:cardpay:order/sc342uelx2optq9","description":"TEST","reference":"w3uh6zf3j5wvhnb","currency":"SGD","importeddate":"2018-12-05T09:50:41Z","state":"close","id":"6549050f22322eb700e7c96168d266b145d31a51a2380bc4efe7bb040516ebb8","source":"rid:card:token/jtwkstwzhr","amount":"5.34","detail":"eyJkZXRhaWwxIjoiZGVzY3JpcHRpb24xIiwiZGV0YWlsMiI6ImRlc2NyaXB0aW9uMiJ9","mode":"card","ttl":"1551779441","action":"refund","hashid":"a70eee4e80ee9d4d19f6194ba5be1c660fdd7b5696ce1cd2dfbf6a66ffdaa08d","entry":"credit","method":"cybersource","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2Fmerchant1","createddate":"2018-12-12T19%3A42%3A00Z","key":"6549050f22322eb700e7c96168d266b145d31a51a2380bc4efe7bb040516ebb8"},{"status":"fail","account":"rid:merchant:account/account2","resource":"rid:cardpay:order/b8ageju82fo4rv0","description":"TEST","reference":"psr7det8x0igaoa","currency":"SGD","importeddate":"2018-12-05T09:50:28Z","state":"capture","id":"faa73368bf6d8fd97ff9526a01c30b158d62c2d7ee9da43a40cf3301e15c6c60","source":"rid:card:token/df1fpcw5zo","amount":"54.05","detail":"eyJkZXRhaWwxIjoiZGVzY3JpcHRpb24xIiwiZGV0YWlsMiI6ImRlc2NyaXB0aW9uMiJ9","mode":"card","ttl":"1551779428","action":"close","hashid":"43a3b83a0516dff7b47f071ff5d24e546ca9e10ed51d66bd45298901dac52766","entry":"credit","method":"mpgs","v":"1.0.0","merchant":"rid%3Amerchant%3Amerchant%2Fmerchant1","createddate":"2018-12-12T15%3A40%3A00Z","key":"faa73368bf6d8fd97ff9526a01c30b158d62c2d7ee9da43a40cf3301e15c6c60"}]

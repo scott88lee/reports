@@ -1,0 +1,29 @@
+SELECT *
+FROM "rdp_datalake_api3_replica"."mamaccounts" as mamacc
+JOIN "rdp_datalake_api3_frontend"."veritas" as veritas
+  ON veritas.account_id = mamacc.id
+WHERE 
+  mamacc.id = '0451bab1-b488-45e4-96e5-14eb7ce06708'
+limit 10;
+
+
+
+UTC datetime
+
+rearrange TX - HEaders
+OrderId 8 + popup
+
+
+=====
+change to Response Code / RC Description - DONE !!!
+Maximise display on Tx - DONE!!!! Hein
+Sales volume date - DONE!!!!
+Funding date move + append date to Description - DONE!
+decimals -funding done
+Smaller sidebar  - DONE!!
+Last day of month billing - DONE!!
+New CSV headers - DONE !!!
+
+SSO integration - DONE!!
+
+

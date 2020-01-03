@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  BackendEndpoint:
+    Type: String
+  ServiceEndpoint:
+    Type: String
+  CertificateArn:
+    Type: String
+    Description: HTTPS certificate for
+  ArtifactsBucket:
+    Type: String
+  EdgeVersionUpdaterPath:
+    Type: String
+  FrontendBucket:
+    Type: String
+  HostedZoneId:
+    Type: String
+  RdpCdnCSP:
+    Type: String
+  RecaptchaCSP:
+    Type: String
+  FontsCSP:
+    Type: String
+  VueModernCSP:
+    Type: String
+  JqueryStyleCSP:
+    Type: String
+  RdpSsoCSP:
+    Type: String
+  DeploymentTime:
+    Type: String
+  WhitelistedExtensions:
+    Type: String
+    Description: >-
+      A comma delimited list of File extensions that are expected in a URL and
+      for which URL rewriting to a default index object should not be performed.
+    Default: css,html,ico,jpg,jpeg,js,png,ttf,txt,webp,xml
+  PriceClass:
+    Type: String
+    Description: The CloudFront distribution price class
+    Default: PriceClass_100
+    AllowedValues:
+      - PriceClass_100
+      - PriceClass_200
+      - PriceClass_All
+
+
+Resources:
+  FrontDNSRecord:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+      - Name: !Ref ServiceEndpoint
+        Type: CNAME
+        TTL: 900
+        ResourceRecords:
+          - !GetAtt CloudFront.DomainName
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub 'CloudFront OAI for ${ServiceEndpoint}'
+
+  DeepFrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref FrontendBucket
+      # AccessControl: PublicRead
+      # WebsiteConfiguration:
+      #   IndexDocument: index.html
+      #   ErrorDocument: error.html
+
+  FrontendBucketPerm:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+    - CloudFrontOriginAccessIdentity
+    Properties:
+      Bucket: !Ref DeepFrontendBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+            Action:
+              - s3:GetObject
+            Resource: !Join
+            - ''
+            - - 'arn:aws:s3:::'
+              - !Ref DeepFrontendBucket
+              - '/*'
+
+  EdgeResponseParameters:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: !Sub 'Whitelist for ${ServiceEndpoint}'
+      Type: StringList
+      Value: !Ref WhitelistedExtensions
+
+  EdgeLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - edgelambda.amazonaws.com
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        -
+          PolicyName: ParameterStoreAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - 'ssm:GetParameter*'
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EdgeResponseParameters}'
+
+  EdgeRequestLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: >-
+        Lambda function to rewrite URI requests
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+          exports.handler = (event, context, callback) => {
+              const request = event.Records[0].cf.request;
+              callback(null, request);
+          };
+      Handler: index.handler
+      Role: !GetAtt EdgeLambdaRole.Arn
+      Runtime: nodejs6.10
+
+  EdgeResponseLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: >-
+        Lambda function to add reponse headers
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+          exports.handler = (event, context, callback) => {
+            const csp = () => {
+              let val = "frame-ancestors 'none';";
+              val += " default-src 'self';";
+              val += " frame-src ${RecaptchaCSP};";
+              val += " font-src 'self' https: data: ${FontsCSP};";
+              val += " img-src 'self' ${RdpCdnCSP};";
+
+              val += " script-src 'self' ${VueModernCSP} ${RdpCdnCSP} ${RecaptchaCSP};";
+              val += " style-src 'self' ${JqueryStyleCSP} ${FontsCSP} ${RdpCdnCSP};";
+              val += " connect-src 'self' ${BackendEndpoint} ${RdpSsoCSP};";
+              return val;
+            };
+            // const request = event.Records[0].cf.request;
+            const response = event.Records[0].cf.response;
+            const headers = response.headers;
+
+            headers['strict-transport-security'] = [{ key: 'Strict-Transport-Security', value: 'max-age= 63072000; includeSubdomains; preload' }];
+            headers['content-security-policy'] = [{ key: 'Content-Security-Policy', value: csp() }];
+            headers['x-content-type-options'] = [{ key: 'X-Content-Type-Options', value: 'nosniff' }];
+            headers['x-frame-options'] = [{ key: 'X-Frame-Options', value: 'DENY' }];
+            headers['x-xss-protection'] = [{ key: 'X-XSS-Protection', value: '1; mode=block' }];
+            headers['referrer-policy'] = [{ key: 'Referrer-Policy', value: 'same-origin' }];
+            headers['server'] = [{ key: 'Server', value: 'Reddotpay' }];
+
+            callback(null, response);
+          };
+      Handler: index.handler
+      Role: !GetAtt EdgeLambdaRole.Arn
+      Runtime: nodejs6.10
+
+  EdgeVersionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+      - PolicyName: VersionExecutionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:PublishVersion
+            Resource:
+            - "*"
+
+  EdgeVersionLamdba:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt EdgeVersionLambdaRole.Arn
+      Handler: serverless.handler
+      Runtime: nodejs6.10
+      Code:
+        S3Bucket: !Ref ArtifactsBucket
+        S3Key: !Ref EdgeVersionUpdaterPath
+
+  EdgeRequestVersionLambda:
+    Type: Custom::LambdaVersion
+    Properties:
+      ServiceToken: !GetAtt EdgeVersionLamdba.Arn
+      FunctionName: !Ref EdgeRequestLambda
+      DeploymentTime: !Ref DeploymentTime
+
+  EdgeResponseVersionLambda:
+    Type: Custom::LambdaVersion
+    Properties:
+      ServiceToken: !GetAtt EdgeVersionLamdba.Arn
+      FunctionName: !Ref EdgeResponseLambda
+      DeploymentTime: !Ref DeploymentTime
+
+
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+        - !Ref ServiceEndpoint
+        DefaultCacheBehavior:
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+          TargetOriginId: Origin
+          ViewerProtocolPolicy: https-only
+          LambdaFunctionAssociations:
+            - EventType: origin-request
+              LambdaFunctionARN: !Ref EdgeRequestVersionLambda
+            - EventType: origin-response
+              LambdaFunctionARN: !Ref EdgeResponseVersionLambda
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+        - DomainName: !Join
+          - ''
+          - - !Ref DeepFrontendBucket
+            - '.s3.amazonaws.com'
+          Id: Origin
+          OriginCustomHeaders:
+            - HeaderName: X-XSS-Protection
+              HeaderValue: 1   mode=block
+            - HeaderName: Content-Security-Policy
+              HeaderValue: "default-src 'self'; frame-ancestors 'none'"
+            - HeaderName: X-Frame-Options
+              HeaderValue: DENY
+            - HeaderName: X-Content-Type-Options
+              HeaderValue: nosniff
+          S3OriginConfig:
+            OriginAccessIdentity: !Join
+            - ''
+            - - 'origin-access-identity/cloudfront/'
+              - !Ref CloudFrontOriginAccessIdentity
+        PriceClass: !Ref PriceClass
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
+
+

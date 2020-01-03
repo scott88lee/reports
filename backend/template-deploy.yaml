@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  StageParameter:
+    Type: String
+    Default: staging
+    AllowedValues:
+      - staging
+      - production
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+    ConstraintDescription: >-
+      must be a list of at least two existing subnets associated with at least
+      two different availability zones. They should be residing in the selected
+      Virtual Private Cloud.
+  SecurityGroups:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: The list of SecurityGroupIds in your Virtual Private Cloud (VPC)
+    ConstraintDescription: >-
+      must be a list of existing security groups. They should be residing in the selected
+      Virtual Private Cloud.
+  ArtifactsBucket:
+    Type: String
+  ServiceEndpoint:
+    Type: String
+  CertificateArn:
+    Type: String
+    Description: Regional Certificate for APIGateway domain name
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID
+  ServiceBasePath:
+    Type: String
+    Default: v1
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  DomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Ref ServiceEndpoint
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !Ref CertificateArn
+
+  DNSRecord:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+      - Name: !Ref DomainName
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt DomainName.RegionalDomainName
+
+  BackendApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref StageParameter
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: !Sub 's3://${ArtifactsBucket}/swagger.yaml'
+
+  DomainMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn:
+      # explicit dependency
+      # issue: https://github.com/awslabs/serverless-application-model/issues/191
+      # workaround: https://github.com/awslabs/serverless-application-model/issues/192
+    - BackendApiStage
+    Properties:
+      BasePath: !Ref ServiceBasePath
+      DomainName: !Ref DomainName
+      RestApiId: !Ref BackendApi
+      Stage: !Ref StageParameter
+
+  BackendFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./
+      Handler: index.handler
+      Runtime: nodejs8.10
+      VpcConfig:
+        SecurityGroupIds:
+          Ref: SecurityGroups
+        SubnetIds:
+          Ref: Subnets
+      Tracing: Active
+      Policies:
+      - AWSLambdaVPCAccessExecutionRole
+      - AWSLambdaBasicExecutionRole
+      - AmazonAthenaFullAccess
+      - AmazonS3FullAccess
+      Events:
+        Refund:
+          Type: Api
+          Properties:
+            Path: /refund
+            Method: post
+            RestApiId: !Ref BackendApi
+        Void:
+          Type: Api
+          Properties:
+            Path: /void
+            Method: post
+            RestApiId: !Ref BackendApi
+        Auth:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: get
+            RestApiId: !Ref BackendApi
+        Deep:
+          Type: Api
+          Properties:
+            Path: /deep
+            Method: post
+            RestApiId: !Ref BackendApi
+        Transactions:
+          Type: Api
+          Properties:
+            Path: /transactions
+            Method: get
+            RestApiId: !Ref BackendApi
+        Billing:
+          Type: Api
+          Properties:
+            Path: /billing
+            Method: get
+            RestApiId: !Ref BackendApi
+        Funding:
+          Type: Api
+          Properties:
+            Path: /funding
+            Method: get
+            RestApiId: !Ref BackendApi
+        Retrieve:
+          Type: Api
+          Properties:
+            Path: /retrieve
+            Method: get
+            RestApiId: !Ref BackendApi
+        Presign:
+          Type: Api
+          Properties:
+            Path: /presign
+            Method: get
+            RestApiId: !Ref BackendApi
+        Notify:
+          Type: Api
+          Properties:
+            Path: /notify
+            Method: post
+            RestApiId: !Ref BackendApi
+          

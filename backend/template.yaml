@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  BackendFunction:
+      # This resource creates a Lambda function.
+      Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+      Properties:
+        # This function uses the Nodejs v8.10 runtime.
+        Runtime: nodejs8.10
+
+        # This is the Lambda function's handler.
+        Handler: index.handler
+
+        # The location of the Lambda function code.
+        CodeUri: ./
+
+        VpcConfig:
+          SecurityGroupIds:
+            Ref: SecurityGroups
+          SubnetIds:
+            Ref: Subnets
+        Tracing: Active
+        Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSLambdaBasicExecutionRole
+        - AmazonAthenaFullAccess
+        - AmazonS3FullAccess
+
+        # Event sources to attach to this function. In this case, we are attaching
+        # multiple API Gateway endpoints to the Lambda function. The function is
+        # called when a HTTP request is made to the API Gateway endpoint.
+        Events:
+          Refund:
+            Type: Api
+            Properties:
+              Path: /refund
+              Method: post
+          Void:
+            Type: Api
+            Properties:
+              Path: /void
+              Method: post
+          Auth:
+            Type: Api
+            Properties:
+              Path: /auth
+              Method: get
+          Deep:
+            Type: Api
+            Properties:
+              Path: /deep
+              Method: post
+          Transactions:
+            Type: Api
+            Properties:
+              Path: /transactions
+              Method: get
+          Billing:
+            Type: Api
+            Properties:
+              Path: /billing
+              Method: get
+          Funding:
+            Type: Api
+            Properties:
+              Path: /funding
+              Method: get
+          Retrieve:
+            Type: Api
+            Properties:
+              Path: /retrieve
+              Method: get
+          Presign:
+            Type: Api
+            Properties:
+              Path: /presign
+              Method: get
+          Notify:
+            Type: Api
+            Properties:
+              Path: /notify
+              Method: post
+
+
+
+
+
+
+
+# Globals:
+#     Function:
+#         Timeout: 60
+
+
+
+# Resources:
+
+#     SSOFunction:
+#         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+#         Properties:
+#             CodeUri: ./
+#             Handler: index.handler
+#             Runtime: nodejs8.10
+#             Events:
+#                 Login:
+#                     Type: Api
+#                     Properties:
+#                         Path: /login
+#                         Method: post
+#                         Cors: true
+#                 Signup:
+#                     Type: Api
+#                     Properties:
+#                         Path: /signup
+#                         Method: post
+#                         Cors: true
+#                 Verify:
+#                     Type: Api
+#                     Properties:
+#                         Path: /verify
+#                         Method: post
+#                         Cors: true
+#                 VerifyEmail:
+#                     Type: Api
+#                     Properties:
+#                         Path: /email
+#                         Method: post
+#                         Cors: true
+#                 ExchangeToken:
+#                     Type: Api
+#                     Properties:
+#                         Path: /exchange
+#                         Method: post
+#                         Cors: true
+#                 # Invoice:
+#                 #     Type: Api
+#                 #     Properties:
+#                 #         Path: /invoices/{invoiceId}
+#                 #         Method: get
+#                 # StoreInvoice:
+#                 #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+#                 #     Properties:
+#                 #         Path: /invoices/store
+#                 #         Method: post
+#                 # UpdateInvoice:
+#                 #     Type: Api
+#                 #     Properties:
+#                 #         Path: /invoices/{invoiceId}/update
+#                 #         Method: post
+#                 # DestroyInvoice:
+#                 #     Type: Api
+#                 #     Properties:
+#                 #         Path: /invoices/{invoiceId}/destroy
+#                 #         Method: post
+#                 # UploadInvoice:
+#                 #     Type: Api
+#                 #     Properties:
+#                 #         Path: /invoices/upload
+#                 #         Method: post
